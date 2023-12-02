@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { CustomPassword } from 'src/validator/custom-password.validator';
 
 export class LoginDto {
   @IsNotEmpty()
@@ -8,5 +9,6 @@ export class LoginDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
+  @CustomPassword()
   readonly password: string;
 }

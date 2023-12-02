@@ -1,4 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { CustomPassword } from 'src/validator/custom-password.validator';
+import { MatchPasswords } from 'src/validator/match-passwords.validator';
 
 export class SignUpDto {
   @IsNotEmpty()
@@ -12,5 +14,11 @@ export class SignUpDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(6)
+  @CustomPassword()
   readonly password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MatchPasswords('password', { message: 'Passwords must match' })
+  readonly confirmPassword: string;
 }
