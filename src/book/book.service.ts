@@ -66,7 +66,7 @@ export class BookService {
     limit = 3,
   ): Promise<Book[]> {
     try {
-      const query = { author: authorName };
+      const query = { author: { $regex: authorName, $options: 'i' } };
       const skipCount = (page - 1) * limit;
 
       const books = await this.bookModel
@@ -121,9 +121,20 @@ export class BookService {
     }
   }
 
-  async getBooksByCategory(category: string): Promise<Book[]> {
+  async getBooksByCategory(
+    category: string,
+    page = 1,
+    limit = 3,
+  ): Promise<Book[]> {
     try {
-      return await this.bookModel.find({ category }).exec();
+      const query = { category: { $regex: category, $options: 'i' } };
+      const skipCount = (page - 1) * limit;
+
+      return await this.bookModel
+        .find(query)
+        .skip(skipCount)
+        .limit(limit)
+        .exec();
     } catch (error) {
       throw new Error('Unable to fetch books by category: ' + error.message);
     }

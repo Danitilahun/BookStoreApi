@@ -147,9 +147,13 @@ export class BookController {
   }
 
   @Get('category/:category')
-  async getBooksByCategory(@Param('category') category: string) {
+  async getBooksByCategory(
+    @Param('category') category: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
     try {
-      return await this.bookService.getBooksByCategory(category);
+      return await this.bookService.getBooksByCategory(category, page, limit);
     } catch (error) {
       throw new HttpException(
         'Unable to fetch books by category: ' + error.message,
