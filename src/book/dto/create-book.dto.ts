@@ -19,6 +19,10 @@ export class CreateBookDto {
   readonly price: number;
 
   @IsNotEmpty()
+  @IsNumber()
+  readonly rating: number;
+
+  @IsNotEmpty()
   @IsEnum(Category, { message: 'Please enter correct category.' })
   readonly category: Category;
 }

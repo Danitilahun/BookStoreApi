@@ -14,6 +14,8 @@ import {
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Book } from './schemas/book.schema';
+import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('book')
 export class BookController {
@@ -29,7 +31,7 @@ export class BookController {
   }
 
   @Post()
-  async addBook(@Body() bookData: Partial<Book>): Promise<Book> {
+  async addBook(@Body() bookData: CreateBookDto): Promise<Book> {
     try {
       return await this.bookService.addBook(bookData);
     } catch (error) {
@@ -53,7 +55,7 @@ export class BookController {
   @Put(':id')
   async updateBook(
     @Param('id') id: string,
-    @Body() updatedBookData: Partial<Book>,
+    @Body() updatedBookData: UpdateBookDto,
   ): Promise<Book> {
     try {
       return await this.bookService.updateBook(id, updatedBookData);
