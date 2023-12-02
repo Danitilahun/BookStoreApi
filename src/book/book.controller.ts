@@ -11,13 +11,17 @@ import {
   ConflictException,
   Query,
   ParseIntPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Book } from './schemas/book.schema';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('book')
+@UseGuards(AuthGuard())
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
@@ -31,9 +35,9 @@ export class BookController {
   }
 
   @Post()
-  async addBook(@Body() bookData: CreateBookDto): Promise<Book> {
+  async addBook(@Body() bookData: CreateBookDto, @Req() req): Promise<Book> {
     try {
-      return await this.bookService.addBook(bookData);
+      return await this.bookService.addBook(bookData, req.user);
     } catch (error) {
       if (error instanceof ConflictException) {
         console.log('here in');

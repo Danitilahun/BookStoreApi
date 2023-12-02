@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Book } from './schemas/book.schema';
+import { User } from 'src/auth/schemas/user.schema';
 
 @Injectable()
 export class BookService {
@@ -30,9 +31,10 @@ export class BookService {
     return book;
   }
 
-  async addBook(bookData: Partial<Book>): Promise<Book> {
+  async addBook(bookData: Partial<Book>, user: User): Promise<Book> {
     try {
-      const newBook = new this.bookModel(bookData);
+      const data = Object.assign(bookData, { user: user._id });
+      const newBook = new this.bookModel(data);
       return await newBook.save();
     } catch (error) {
       if (error.code === 11000) {
