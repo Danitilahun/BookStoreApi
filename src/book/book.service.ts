@@ -60,9 +60,22 @@ export class BookService {
     return deletedBook as unknown as Book;
   }
 
-  async getBooksByAuthor(authorName: string): Promise<Book[]> {
+  async getBooksByAuthor(
+    authorName: string,
+    page = 1,
+    limit = 3,
+  ): Promise<Book[]> {
     try {
-      return await this.bookModel.find({ author: authorName }).exec();
+      const query = { author: authorName };
+      const skipCount = (page - 1) * limit;
+
+      const books = await this.bookModel
+        .find(query)
+        .skip(skipCount)
+        .limit(limit)
+        .exec();
+
+      return books;
     } catch (error) {
       throw new Error('Unable to fetch books by author: ' + error.message);
     }

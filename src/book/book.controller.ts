@@ -89,9 +89,13 @@ export class BookController {
   }
 
   @Get('author/:authorName')
-  async getBooksByAuthor(@Param('authorName') authorName: string) {
+  async getBooksByAuthor(
+    @Param('authorName') authorName: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Promise<Book[]> {
     try {
-      return await this.bookService.getBooksByAuthor(authorName);
+      return await this.bookService.getBooksByAuthor(authorName, page, limit);
     } catch (error) {
       throw new HttpException(
         'Unable to fetch books by author: ' + error.message,
