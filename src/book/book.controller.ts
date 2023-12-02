@@ -10,6 +10,7 @@ import {
   HttpException,
   ConflictException,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Book } from './schemas/book.schema';
@@ -91,8 +92,8 @@ export class BookController {
   @Get('author/:authorName')
   async getBooksByAuthor(
     @Param('authorName') authorName: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
   ): Promise<Book[]> {
     try {
       return await this.bookService.getBooksByAuthor(authorName, page, limit);
@@ -135,7 +136,7 @@ export class BookController {
   }
 
   @Get('newest/:limit')
-  async getNewestBooks(@Param('limit') limit: number) {
+  async getNewestBooks(@Param('limit', ParseIntPipe) limit: number) {
     try {
       return await this.bookService.getNewestBooks(limit);
     } catch (error) {
@@ -149,8 +150,8 @@ export class BookController {
   @Get('category/:category')
   async getBooksByCategory(
     @Param('category') category: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
     try {
       return await this.bookService.getBooksByCategory(category, page, limit);

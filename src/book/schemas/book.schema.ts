@@ -38,17 +38,16 @@ const validateRating = (value: any) => {
 
 @Schema({ timestamps: true })
 export class Book {
-  @Prop({ required: [true, 'Title is required'], type: String })
+  @Prop({ type: String })
   title: string;
 
-  @Prop({ required: [true, 'Description is required'], type: String })
+  @Prop({ type: String })
   description: string;
 
-  @Prop({ required: [true, 'Author is required'], type: String })
+  @Prop({ type: String })
   author: string;
 
   @Prop({
-    required: [true, 'Price is required'],
     min: [0, 'Price must be at least 0'],
     validate: [validatePrice, 'Price should be a number'],
     type: Number,
@@ -56,14 +55,12 @@ export class Book {
   price: number;
 
   @Prop({
-    required: [true, 'Rating is required'],
     validate: [validateRating, 'Rating should be a number between 0 and 5'],
     type: Number,
   })
   rating: number;
 
   @Prop({
-    required: [true, 'Category is required'],
     enum: { values: Object.values(Category), message: 'Invalid category' },
     type: String,
   })
