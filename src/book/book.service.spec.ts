@@ -5,7 +5,7 @@ import { Book, Category } from './schemas/book.schema';
 import mongoose, { Model } from 'mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
-import { User } from 'src/auth/schemas/user.schema';
+import { User } from '../auth/schemas/user.schema';
 
 describe('BookService', () => {
   let bookService: BookService;
@@ -18,7 +18,6 @@ describe('BookService', () => {
     description: 'Book Description',
     author: 'Author',
     price: 100,
-    rating: 4,
     category: Category.FANTASY,
   };
 
@@ -51,7 +50,7 @@ describe('BookService', () => {
     model = module.get<Model<Book>>(getModelToken(Book.name));
   });
 
-  describe('getAllBooks', () => {
+  describe('findAll', () => {
     it('should return an array of books', async () => {
       const query = { page: '1', keyword: 'test' };
 
@@ -64,7 +63,7 @@ describe('BookService', () => {
           }) as any,
       );
 
-      const result = await bookService.getAllBooks(query);
+      const result = await bookService.findAll(query);
 
       expect(model.find).toHaveBeenCalledWith({
         title: { $regex: 'test', $options: 'i' },
@@ -74,14 +73,13 @@ describe('BookService', () => {
     });
   });
 
-  describe('addBook', () => {
+  describe('create', () => {
     it('should create and return a book', async () => {
       const newBook = {
         title: 'New Book',
         description: 'Book Description',
         author: 'Author',
         price: 100,
-        rating: 4,
         category: Category.FANTASY,
       };
 
@@ -89,7 +87,7 @@ describe('BookService', () => {
         .spyOn(model, 'create')
         .mockImplementationOnce(() => Promise.resolve(mockBook) as any);
 
-      const result = await bookService.addBook(
+      const result = await bookService.create(
         newBook as CreateBookDto,
         mockUser as User,
       );
@@ -98,7 +96,16 @@ describe('BookService', () => {
     });
   });
 
-  describe('getBookById', () => {
+  describe('findById', () => {
+    it('should find and return a book by ID', async () => {
+      jest.spyOn(model, 'findById').mockResolvedValue(mockBook);
+
+      const result = await bookService.findById(mockBook._id);
+
+      expect(model.findById).toHaveBeenCalledWith(mockBook._id);
+      expect(result).toEqual(mockBook);
+    });
+
     it('should throw BadRequestException if invalid ID is provided', async () => {
       const id = 'invalid-id';
 
@@ -106,31 +113,18 @@ describe('BookService', () => {
         .spyOn(mongoose, 'isValidObjectId')
         .mockReturnValue(false);
 
-      await expect(bookService.getBookById(id)).rejects.toThrow(
+      await expect(bookService.findById(id)).rejects.toThrow(
         BadRequestException,
       );
 
       expect(isValidObjectIDMock).toHaveBeenCalledWith(id);
       isValidObjectIDMock.mockRestore();
     });
-    it('should return a book with ID', async () => {
-      // Mocking the behavior of the `findById` method of the model
-      jest.spyOn(model, 'findById').mockResolvedValue(mockBook);
-
-      // Calling the method under test
-      const result = await bookService.getBookById(mockBook._id);
-
-      // Expecting that `findById` was called with the expected ID
-      expect(model.findById).toHaveBeenCalledWith(mockBook._id);
-
-      // Expecting that the result matches the mock book object
-      expect(result).toEqual(mockBook);
-    });
 
     it('should throw NotFoundException if book is not found', async () => {
       jest.spyOn(model, 'findById').mockResolvedValue(null);
 
-      await expect(bookService.getBookById(mockBook._id)).rejects.toThrow(
+      await expect(bookService.findById(mockBook._id)).rejects.toThrow(
         NotFoundException,
       );
 
@@ -138,14 +132,14 @@ describe('BookService', () => {
     });
   });
 
-  describe('updateBook', () => {
+  describe('updateById', () => {
     it('should update and return a book', async () => {
       const updatedBook = { ...mockBook, title: 'Updated name' };
       const book = { title: 'Updated name' };
 
       jest.spyOn(model, 'findByIdAndUpdate').mockResolvedValue(updatedBook);
 
-      const result = await bookService.updateBook(mockBook._id, book as any);
+      const result = await bookService.updateById(mockBook._id, book as any);
 
       expect(model.findByIdAndUpdate).toHaveBeenCalledWith(mockBook._id, book, {
         new: true,
@@ -160,7 +154,7 @@ describe('BookService', () => {
     it('should delete and return a book', async () => {
       jest.spyOn(model, 'findByIdAndDelete').mockResolvedValue(mockBook);
 
-      const result = await bookService.deleteBook(mockBook._id);
+      const result = await bookService.deleteById(mockBook._id);
 
       expect(model.findByIdAndDelete).toHaveBeenCalledWith(mockBook._id);
 

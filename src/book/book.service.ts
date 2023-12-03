@@ -1,14 +1,14 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
-  ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Book } from './schemas/book.schema';
-import { User } from 'src/auth/schemas/user.schema';
+
 import { Query } from 'express-serve-static-core';
+import { User } from '../auth/schemas/user.schema';
 
 @Injectable()
 export class BookService {
@@ -17,7 +17,7 @@ export class BookService {
     private bookModel: mongoose.Model<Book>,
   ) {}
 
-  async getAllBooks(query: Query): Promise<Book[]> {
+  async findAll(query: Query): Promise<Book[]> {
     const resPerPage = 2;
     const currentPage = Number(query.page) || 1;
     const skip = resPerPage * (currentPage - 1);
@@ -38,164 +38,37 @@ export class BookService {
     return books;
   }
 
-  async getBookById(id: string): Promise<Book> {
-    const isValidId = mongoose.isValidObjectId(id);
-
-    if (!isValidId) {
-      throw new BadRequestException('Please enter correct id.');
-    }
-    const book = await this.bookModel.findById(id);
-    if (!book) {
-      throw new NotFoundException('Book not found');
-    }
-    return book;
-  }
-
-  async addBook(bookData: Partial<Book>, user: User): Promise<Book> {
-    const data = Object.assign(bookData, { user: user._id });
+  async create(book: Book, user: User): Promise<Book> {
+    const data = Object.assign(book, { user: user._id });
 
     const res = await this.bookModel.create(data);
     return res;
   }
 
-  async updateBook(id: string, updatedBookData: Partial<Book>): Promise<Book> {
-    return await this.bookModel.findByIdAndUpdate(id, updatedBookData, {
+  async findById(id: string): Promise<Book> {
+    const isValidId = mongoose.isValidObjectId(id);
+
+    if (!isValidId) {
+      throw new BadRequestException('Please enter correct id.');
+    }
+
+    const book = await this.bookModel.findById(id);
+
+    if (!book) {
+      throw new NotFoundException('Book not found.');
+    }
+
+    return book;
+  }
+
+  async updateById(id: string, book: Book): Promise<Book> {
+    return await this.bookModel.findByIdAndUpdate(id, book, {
       new: true,
       runValidators: true,
     });
   }
 
-  async deleteBook(id: string): Promise<Book> {
+  async deleteById(id: string): Promise<Book> {
     return (await this.bookModel.findByIdAndDelete(id)) as unknown as Book;
-  }
-
-  async getBooksByAuthor(
-    authorName: string,
-    page = 1,
-    limit = 3,
-  ): Promise<Book[]> {
-    try {
-      const query = { author: { $regex: authorName, $options: 'i' } };
-      const skipCount = (page - 1) * limit;
-
-      const books = await this.bookModel
-        .find(query)
-        .skip(skipCount)
-        .limit(limit)
-        .exec();
-
-      return books;
-    } catch (error) {
-      throw new Error('Unable to fetch books by author: ' + error.message);
-    }
-  }
-
-  async getBooksByPriceRange(
-    minPrice: number,
-    maxPrice: number,
-  ): Promise<Book[]> {
-    try {
-      return await this.bookModel
-        .find({ price: { $gte: minPrice, $lte: maxPrice } })
-        .exec();
-    } catch (error) {
-      throw new Error('Unable to fetch books by price range: ' + error.message);
-    }
-  }
-
-  async getBooksByRatingRange(
-    minRating: number,
-    maxRating: number,
-  ): Promise<Book[]> {
-    try {
-      return await this.bookModel
-        .find({ rating: { $gte: minRating, $lte: maxRating } })
-        .exec();
-    } catch (error) {
-      throw new Error(
-        'Unable to fetch books by rating range: ' + error.message,
-      );
-    }
-  }
-
-  async getNewestBooks(limit: number): Promise<Book[]> {
-    try {
-      return await this.bookModel
-        .find()
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .exec();
-    } catch (error) {
-      throw new Error('Unable to fetch newest books: ' + error.message);
-    }
-  }
-
-  async getBooksByCategory(
-    category: string,
-    page = 1,
-    limit = 3,
-  ): Promise<Book[]> {
-    try {
-      const query = { category: { $regex: category, $options: 'i' } };
-      const skipCount = (page - 1) * limit;
-
-      return await this.bookModel
-        .find(query)
-        .skip(skipCount)
-        .limit(limit)
-        .exec();
-    } catch (error) {
-      throw new Error('Unable to fetch books by category: ' + error.message);
-    }
-  }
-
-  async searchBooksByTitle(titleKeyword: string): Promise<Book[]> {
-    try {
-      return await this.bookModel
-        .find({ title: { $regex: titleKeyword, $options: 'i' } })
-        .exec();
-    } catch (error) {
-      throw new Error('Unable to search books by title: ' + error.message);
-    }
-  }
-
-  async getBooksAboveRating(rating: number): Promise<Book[]> {
-    try {
-      return await this.bookModel.find({ rating: { $gte: rating } }).exec();
-    } catch (error) {
-      throw new Error(
-        'Unable to fetch books above the specified rating: ' + error.message,
-      );
-    }
-  }
-
-  async getBooksBelowRating(rating: number): Promise<Book[]> {
-    try {
-      return await this.bookModel.find({ rating: { $lte: rating } }).exec();
-    } catch (error) {
-      throw new Error(
-        'Unable to fetch books below the specified rating: ' + error.message,
-      );
-    }
-  }
-
-  async getBooksAbovePrice(price: number): Promise<Book[]> {
-    try {
-      return await this.bookModel.find({ price: { $gte: price } }).exec();
-    } catch (error) {
-      throw new Error(
-        'Unable to fetch books above the specified price: ' + error.message,
-      );
-    }
-  }
-
-  async getBooksBelowPrice(price: number): Promise<Book[]> {
-    try {
-      return await this.bookModel.find({ price: { $lte: price } }).exec();
-    } catch (error) {
-      throw new Error(
-        'Unable to fetch books below the specified price: ' + error.message,
-      );
-    }
   }
 }
