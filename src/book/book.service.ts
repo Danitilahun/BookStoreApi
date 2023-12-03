@@ -52,16 +52,10 @@ export class BookService {
   }
 
   async addBook(bookData: Partial<Book>, user: User): Promise<Book> {
-    try {
-      const data = Object.assign(bookData, { user: user._id });
-      const newBook = new this.bookModel(data);
-      return await newBook.save();
-    } catch (error) {
-      if (error.code === 11000) {
-        throw new ConflictException('Book data already exists.');
-      }
-      throw error;
-    }
+    const data = Object.assign(bookData, { user: user._id });
+
+    const res = await this.bookModel.create(data);
+    return res;
   }
 
   async updateBook(id: string, updatedBookData: Partial<Book>): Promise<Book> {

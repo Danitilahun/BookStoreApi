@@ -4,6 +4,8 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Book, Category } from './schemas/book.schema';
 import mongoose, { Model } from 'mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { CreateBookDto } from './dto/create-book.dto';
+import { User } from 'src/auth/schemas/user.schema';
 
 describe('BookService', () => {
   let bookService: BookService;
@@ -69,6 +71,30 @@ describe('BookService', () => {
       });
 
       expect(result).toEqual([mockBook]);
+    });
+  });
+
+  describe('addBook', () => {
+    it('should create and return a book', async () => {
+      const newBook = {
+        title: 'New Book',
+        description: 'Book Description',
+        author: 'Author',
+        price: 100,
+        rating: 4,
+        category: Category.FANTASY,
+      };
+
+      jest
+        .spyOn(model, 'create')
+        .mockImplementationOnce(() => Promise.resolve(mockBook) as any);
+
+      const result = await bookService.addBook(
+        newBook as CreateBookDto,
+        mockUser as User,
+      );
+
+      expect(result).toEqual(mockBook);
     });
   });
 
