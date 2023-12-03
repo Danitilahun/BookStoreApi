@@ -137,4 +137,22 @@ describe('BookService', () => {
       expect(model.findById).toHaveBeenCalledWith(mockBook._id);
     });
   });
+
+  describe('updateBook', () => {
+    it('should update and return a book', async () => {
+      const updatedBook = { ...mockBook, title: 'Updated name' };
+      const book = { title: 'Updated name' };
+
+      jest.spyOn(model, 'findByIdAndUpdate').mockResolvedValue(updatedBook);
+
+      const result = await bookService.updateBook(mockBook._id, book as any);
+
+      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(mockBook._id, book, {
+        new: true,
+        runValidators: true,
+      });
+
+      expect(result.title).toEqual(book.title);
+    });
+  });
 });

@@ -59,13 +59,10 @@ export class BookService {
   }
 
   async updateBook(id: string, updatedBookData: Partial<Book>): Promise<Book> {
-    const existingBook = await this.bookModel
-      .findByIdAndUpdate(id, updatedBookData, { new: true })
-      .exec();
-    if (!existingBook) {
-      throw new NotFoundException('Book not found');
-    }
-    return existingBook;
+    return await this.bookModel.findByIdAndUpdate(id, updatedBookData, {
+      new: true,
+      runValidators: true,
+    });
   }
 
   async deleteBook(id: string): Promise<Book> {
