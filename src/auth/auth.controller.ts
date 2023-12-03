@@ -1,30 +1,19 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
-import { SignUpDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
+import { SignUpDto } from './dto/signup.dto';
+
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   @Post('/signup')
-  async signUp(@Body() signUpDto: SignUpDto): Promise<{ token: string }> {
-    try {
-      const token = await this.authService.signUp(signUpDto);
-      return token;
-    } catch (error) {
-      // Handle specific error here or rethrow it
-      throw new Error('Signup failed: ' + error.message);
-    }
+  signUp(@Body() signUpDto: SignUpDto): Promise<{ token: string }> {
+    return this.authService.signUp(signUpDto);
   }
 
-  @Post('/login')
-  async login(@Body() loginDto: LoginDto): Promise<{ token: string }> {
-    try {
-      const token = await this.authService.login(loginDto);
-      return token;
-    } catch (error) {
-      // Handle specific error here or rethrow it
-      throw new Error('Login failed: ' + error.message);
-    }
+  @Get('/login')
+  login(@Body() loginDto: LoginDto): Promise<{ token: string }> {
+    return this.authService.login(loginDto);
   }
 }

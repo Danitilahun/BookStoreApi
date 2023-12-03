@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
-import { CustomPassword } from 'src/validator/custom-password.validator';
-import { MatchPasswords } from 'src/validator/match-passwords.validator';
+import { CustomPassword } from '../../validator/custom-password.validator';
+import { MatchPasswords } from '../../validator/match-passwords.validator';
 
 export class SignUpDto {
   @IsNotEmpty()
