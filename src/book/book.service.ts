@@ -24,11 +24,15 @@ export class BookService {
   }
 
   async getBookById(id: string): Promise<Book> {
-    const book = await this.bookModel.findById(id).exec();
-    if (!book) {
-      throw new NotFoundException('Book not found');
+    try {
+      const book = await this.bookModel.findById(id).exec();
+      if (!book) {
+        throw new NotFoundException('Book not found');
+      }
+      return book;
+    } catch (error) {
+      throw new Error('Unable to fetch books: ' + error.message);
     }
-    return book;
   }
 
   async addBook(bookData: Partial<Book>, user: User): Promise<Book> {
