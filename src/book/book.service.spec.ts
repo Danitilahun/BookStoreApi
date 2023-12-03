@@ -2,7 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BookService } from './book.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { Book, Category } from './schemas/book.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('BookService', () => {
   let bookService: BookService;
@@ -15,6 +16,7 @@ describe('BookService', () => {
     description: 'Book Description',
     author: 'Author',
     price: 100,
+    rating: 4,
     category: Category.FANTASY,
   };
 
@@ -45,5 +47,45 @@ describe('BookService', () => {
 
     bookService = module.get<BookService>(BookService);
     model = module.get<Model<Book>>(getModelToken(Book.name));
+  });
+
+  describe('getBookById', () => {
+    it('should throw BadRequestException if invalid ID is provided', async () => {
+      const id = 'invalid-id';
+
+      const isValidObjectIDMock = jest
+        .spyOn(mongoose, 'isValidObjectId')
+        .mockReturnValue(false);
+
+      await expect(bookService.getBookById(id)).rejects.toThrow(
+        BadRequestException,
+      );
+
+      expect(isValidObjectIDMock).toHaveBeenCalledWith(id);
+      isValidObjectIDMock.mockRestore();
+    });
+    it('should return a book with ID', async () => {
+      // Mocking the behavior of the `findById` method of the model
+      jest.spyOn(model, 'findById').mockResolvedValue(mockBook);
+
+      // Calling the method under test
+      const result = await bookService.getBookById(mockBook._id);
+
+      // Expecting that `findById` was called with the expected ID
+      expect(model.findById).toHaveBeenCalledWith(mockBook._id);
+
+      // Expecting that the result matches the mock book object
+      expect(result).toEqual(mockBook);
+    });
+
+    it('should throw NotFoundException if book is not found', async () => {
+      jest.spyOn(model, 'findById').mockResolvedValue(null);
+
+      await expect(bookService.getBookById(mockBook._id)).rejects.toThrow(
+        NotFoundException,
+      );
+
+      expect(model.findById).toHaveBeenCalledWith(mockBook._id);
+    });
   });
 });

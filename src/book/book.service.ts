@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
@@ -24,15 +25,16 @@ export class BookService {
   }
 
   async getBookById(id: string): Promise<Book> {
-    try {
-      const book = await this.bookModel.findById(id).exec();
-      if (!book) {
-        throw new NotFoundException('Book not found');
-      }
-      return book;
-    } catch (error) {
-      throw new Error('Unable to fetch books: ' + error.message);
+    const isValidId = mongoose.isValidObjectId(id);
+
+    if (!isValidId) {
+      throw new BadRequestException('Please enter correct id.');
     }
+    const book = await this.bookModel.findById(id);
+    if (!book) {
+      throw new NotFoundException('Book not found');
+    }
+    return book;
   }
 
   async addBook(bookData: Partial<Book>, user: User): Promise<Book> {
