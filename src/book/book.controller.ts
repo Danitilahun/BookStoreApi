@@ -19,6 +19,7 @@ import { Book } from './schemas/book.schema';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ValidateObjectIdPipe } from './pipes/validate-objectid.pipe';
 
 @Controller('book')
 @UseGuards(AuthGuard())
@@ -58,7 +59,7 @@ export class BookController {
 
   @Put(':id')
   async updateBook(
-    @Param('id') id: string,
+    @Param('id', ValidateObjectIdPipe) id: string,
     @Body() updatedBookData: UpdateBookDto,
   ): Promise<Book> {
     try {
@@ -72,7 +73,9 @@ export class BookController {
   }
 
   @Delete(':id')
-  async deleteBook(@Param('id') id: string): Promise<Book> {
+  async deleteBook(
+    @Param('id', ValidateObjectIdPipe) id: string,
+  ): Promise<Book> {
     try {
       return await this.bookService.deleteBook(id);
     } catch (error) {
@@ -84,7 +87,9 @@ export class BookController {
   }
 
   @Get(':id')
-  async getBookById(@Param('id') id: string): Promise<Book> {
+  async getBookById(
+    @Param('id', ValidateObjectIdPipe) id: string,
+  ): Promise<Book> {
     try {
       return await this.bookService.getBookById(id);
     } catch (error) {
