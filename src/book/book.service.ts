@@ -66,11 +66,7 @@ export class BookService {
   }
 
   async deleteBook(id: string): Promise<Book> {
-    const deletedBook = await this.bookModel.findByIdAndDelete(id).exec();
-    if (!deletedBook) {
-      throw new NotFoundException('Book not found');
-    }
-    return deletedBook as unknown as Book;
+    return (await this.bookModel.findByIdAndDelete(id)) as unknown as Book;
   }
 
   async getBooksByAuthor(

@@ -155,4 +155,16 @@ describe('BookService', () => {
       expect(result.title).toEqual(book.title);
     });
   });
+
+  describe('deleteById', () => {
+    it('should delete and return a book', async () => {
+      jest.spyOn(model, 'findByIdAndDelete').mockResolvedValue(mockBook);
+
+      const result = await bookService.deleteBook(mockBook._id);
+
+      expect(model.findByIdAndDelete).toHaveBeenCalledWith(mockBook._id);
+
+      expect(result).toEqual(mockBook);
+    });
+  });
 });
