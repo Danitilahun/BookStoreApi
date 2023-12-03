@@ -27,9 +27,9 @@ export class BookController {
   constructor(private readonly bookService: BookService) {}
 
   @Get()
-  async getAllBooks(): Promise<Book[]> {
+  async getAllBooks(@Query() query): Promise<Book[]> {
     try {
-      return await this.bookService.getAllBooks();
+      return await this.bookService.getAllBooks(query);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

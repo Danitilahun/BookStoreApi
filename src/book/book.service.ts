@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Book } from './schemas/book.schema';
 import { User } from 'src/auth/schemas/user.schema';
+import { Query } from 'express-serve-static-core';
 
 @Injectable()
 export class BookService {
@@ -16,12 +17,25 @@ export class BookService {
     private bookModel: mongoose.Model<Book>,
   ) {}
 
-  async getAllBooks(): Promise<Book[]> {
-    try {
-      return await this.bookModel.find().exec();
-    } catch (error) {
-      throw new Error('Unable to fetch books: ' + error.message);
-    }
+  async getAllBooks(query: Query): Promise<Book[]> {
+    const resPerPage = 2;
+    const currentPage = Number(query.page) || 1;
+    const skip = resPerPage * (currentPage - 1);
+
+    const keyword = query.keyword
+      ? {
+          title: {
+            $regex: query.keyword,
+            $options: 'i',
+          },
+        }
+      : {};
+
+    const books = await this.bookModel
+      .find({ ...keyword })
+      .limit(resPerPage)
+      .skip(skip);
+    return books;
   }
 
   async getBookById(id: string): Promise<Book> {

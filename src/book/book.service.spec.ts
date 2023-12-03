@@ -49,6 +49,29 @@ describe('BookService', () => {
     model = module.get<Model<Book>>(getModelToken(Book.name));
   });
 
+  describe('getAllBooks', () => {
+    it('should return an array of books', async () => {
+      const query = { page: '1', keyword: 'test' };
+
+      jest.spyOn(model, 'find').mockImplementation(
+        () =>
+          ({
+            limit: () => ({
+              skip: jest.fn().mockResolvedValue([mockBook]),
+            }),
+          }) as any,
+      );
+
+      const result = await bookService.getAllBooks(query);
+
+      expect(model.find).toHaveBeenCalledWith({
+        title: { $regex: 'test', $options: 'i' },
+      });
+
+      expect(result).toEqual([mockBook]);
+    });
+  });
+
   describe('getBookById', () => {
     it('should throw BadRequestException if invalid ID is provided', async () => {
       const id = 'invalid-id';
